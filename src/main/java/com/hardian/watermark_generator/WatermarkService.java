@@ -31,7 +31,7 @@ public class WatermarkService {
 	// Make watermark slightly more transparent for a balanced look
 	AlphaComposite alphaChannel = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f);
 	g2d.setComposite(alphaChannel);
-	g2d.setColor(new Color(140, 140, 140)); // Use a lighter gray for less dark watermark
+	g2d.setColor(new Color(120, 120, 120)); // Use a lighter gray for less dark watermark
 		int fontSize = Math.max(18, width / 20);
 		g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, fontSize));
 
@@ -71,7 +71,7 @@ public class WatermarkService {
 		// Set watermark properties
 		AlphaComposite alphaChannel = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f);
 		g2d.setComposite(alphaChannel);
-		g2d.setColor(Color.WHITE);
+		g2d.setColor(new Color(120, 120, 120)); // Use a lighter gray for less dark watermark
 		int fontSize = Math.max(18, width / 15);
 		g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, fontSize));
 

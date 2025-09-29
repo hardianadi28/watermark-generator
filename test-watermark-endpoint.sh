@@ -2,7 +2,7 @@
 # Test the /api/watermark endpoint with a sample image and watermark text
 
 # Path to a sample PNG image (replace with your own if needed)
-SAMPLE_IMAGE="/Users/hardiansyah/Downloads/npwp.jpeg"
+SAMPLE_IMAGE="/Users/hardiansyah/Downloads/ktp.jpeg"
 
 # Create a sample image if it doesn't exist
 echo "Creating a sample image..."
@@ -13,7 +13,7 @@ fi
 curl -v -X POST \
   -F "image=@$SAMPLE_IMAGE;type=image/png" \
   -F "text=© Hardiansyah" \
-  -F "tiled=true" \
+  -F "tiled=false" \
   http://localhost:8080/api/watermark \
   --output watermarked.png
 
