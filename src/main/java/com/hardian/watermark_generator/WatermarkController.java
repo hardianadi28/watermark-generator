@@ -1,6 +1,5 @@
 package com.hardian.watermark_generator;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +13,6 @@ public class WatermarkController {
 
     private final WatermarkService watermarkService;
 
-    @Autowired
     public WatermarkController(WatermarkService watermarkService) {
         this.watermarkService = watermarkService;
     }
