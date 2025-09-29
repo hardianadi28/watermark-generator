@@ -98,5 +98,6 @@ jobs:
           args: >
             -Dsonar.projectKey=hardianadi28_watermark-generator
             -Dsonar.organization=hardianadi28
+            -Dsonar.java.binaries=target/classes
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
