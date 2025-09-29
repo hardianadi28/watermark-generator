@@ -20,20 +20,14 @@ public class WatermarkService {
 	 * @throws IOException if image processing fails
 	 */
 	public byte[] addTiledWatermark(MultipartFile imageFile, String watermarkText) throws IOException {
-		BufferedImage originalImage = ImageIO.read(imageFile.getInputStream());
+		BufferedImage originalImage = readImage(imageFile);
 		int width = originalImage.getWidth();
 		int height = originalImage.getHeight();
 
-		BufferedImage watermarked = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2d = watermarked.createGraphics();
-		g2d.drawImage(originalImage, 0, 0, null);
-
-	// Make watermark slightly more transparent for a balanced look
-	AlphaComposite alphaChannel = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f);
-	g2d.setComposite(alphaChannel);
-	g2d.setColor(new Color(120, 120, 120)); // Use a lighter gray for less dark watermark
-		int fontSize = Math.max(18, width / 20);
-		g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, fontSize));
+		Graphics2D g2d = null;
+		BufferedImage watermarked = createWatermarkedImage(originalImage);
+		g2d = watermarked.createGraphics();
+		setWatermarkGraphics(g2d, width, 0.3f, new Color(120, 120, 120), width / 20);
 
 		FontMetrics fontMetrics = g2d.getFontMetrics();
 		int stringWidth = fontMetrics.stringWidth(watermarkText);
@@ -46,10 +40,7 @@ public class WatermarkService {
 			}
 		}
 		g2d.dispose();
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(watermarked, "png", baos);
-		return baos.toByteArray();
+		return bufferedImageToPngBytes(watermarked);
 	}
 
 	/**
@@ -60,35 +51,50 @@ public class WatermarkService {
 	 * @throws IOException if image processing fails
 	 */
 	public byte[] addTextWatermark(MultipartFile imageFile, String watermarkText) throws IOException {
-		BufferedImage originalImage = ImageIO.read(imageFile.getInputStream());
+		BufferedImage originalImage = readImage(imageFile);
 		int width = originalImage.getWidth();
 		int height = originalImage.getHeight();
 
-		BufferedImage watermarked = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2d = watermarked.createGraphics();
-		g2d.drawImage(originalImage, 0, 0, null);
+		Graphics2D g2d = null;
+		BufferedImage watermarked = createWatermarkedImage(originalImage);
+		g2d = watermarked.createGraphics();
+		setWatermarkGraphics(g2d, width, 0.4f, new Color(120, 120, 120), width / 15);
 
-		// Set watermark properties
-		AlphaComposite alphaChannel = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f);
-		g2d.setComposite(alphaChannel);
-		g2d.setColor(new Color(120, 120, 120)); // Use a lighter gray for less dark watermark
-		int fontSize = Math.max(18, width / 15);
-		g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, fontSize));
-
-		// Calculate position
 		FontMetrics fontMetrics = g2d.getFontMetrics();
 		int stringWidth = fontMetrics.stringWidth(watermarkText);
 		int stringHeight = fontMetrics.getHeight();
 		int x = width - stringWidth - 20;
 		int y = height - stringHeight + fontMetrics.getAscent() - 10;
 
-		// Draw watermark
 		g2d.drawString(watermarkText, x, y);
 		g2d.dispose();
+		return bufferedImageToPngBytes(watermarked);
+	}
+	// --- Private helpers to reduce code duplication ---
+	private BufferedImage readImage(MultipartFile imageFile) throws IOException {
+		return ImageIO.read(imageFile.getInputStream());
+	}
 
-		// Convert to byte array
+	private BufferedImage createWatermarkedImage(BufferedImage originalImage) {
+		int width = originalImage.getWidth();
+		int height = originalImage.getHeight();
+		BufferedImage watermarked = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = watermarked.createGraphics();
+		g2d.drawImage(originalImage, 0, 0, null);
+		g2d.dispose();
+		return watermarked;
+	}
+
+	private void setWatermarkGraphics(Graphics2D g2d, int width, float alpha, Color color, int fontSize) {
+		AlphaComposite alphaChannel = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha);
+		g2d.setComposite(alphaChannel);
+		g2d.setColor(color);
+		g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, Math.max(18, fontSize)));
+	}
+
+	private byte[] bufferedImageToPngBytes(BufferedImage image) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(watermarked, "png", baos);
+		ImageIO.write(image, "png", baos);
 		return baos.toByteArray();
 	}
 }
