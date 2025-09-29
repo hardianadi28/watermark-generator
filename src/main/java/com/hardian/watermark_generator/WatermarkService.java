@@ -24,23 +24,19 @@ public class WatermarkService {
 		int width = originalImage.getWidth();
 		int height = originalImage.getHeight();
 
-		Graphics2D g2d = null;
-		BufferedImage watermarked = createWatermarkedImage(originalImage);
-		g2d = watermarked.createGraphics();
-		setWatermarkGraphics(g2d, width, 0.3f, new Color(120, 120, 120), width / 20);
-
-		FontMetrics fontMetrics = g2d.getFontMetrics();
+		WatermarkContext ctx = createWatermarkContext(originalImage, width, 0.3f, new Color(120, 120, 120), width / 20);
+		FontMetrics fontMetrics = ctx.g2d.getFontMetrics();
 		int stringWidth = fontMetrics.stringWidth(watermarkText);
 		int stringHeight = fontMetrics.getHeight();
 
 		// Tile the watermark text across the image
 		for (int y = 0; y < height; y += stringHeight + 20) {
 			for (int x = 0; x < width; x += stringWidth + 40) {
-				g2d.drawString(watermarkText, x, y + fontMetrics.getAscent());
+				ctx.g2d.drawString(watermarkText, x, y + fontMetrics.getAscent());
 			}
 		}
-		g2d.dispose();
-		return bufferedImageToPngBytes(watermarked);
+		ctx.g2d.dispose();
+		return bufferedImageToPngBytes(ctx.image);
 	}
 
 	/**
@@ -55,20 +51,33 @@ public class WatermarkService {
 		int width = originalImage.getWidth();
 		int height = originalImage.getHeight();
 
-		Graphics2D g2d = null;
-		BufferedImage watermarked = createWatermarkedImage(originalImage);
-		g2d = watermarked.createGraphics();
-		setWatermarkGraphics(g2d, width, 0.4f, new Color(120, 120, 120), width / 15);
-
-		FontMetrics fontMetrics = g2d.getFontMetrics();
+		WatermarkContext ctx = createWatermarkContext(originalImage, width, 0.4f, new Color(120, 120, 120), width / 15);
+		FontMetrics fontMetrics = ctx.g2d.getFontMetrics();
 		int stringWidth = fontMetrics.stringWidth(watermarkText);
 		int stringHeight = fontMetrics.getHeight();
 		int x = width - stringWidth - 20;
 		int y = height - stringHeight + fontMetrics.getAscent() - 10;
 
-		g2d.drawString(watermarkText, x, y);
-		g2d.dispose();
-		return bufferedImageToPngBytes(watermarked);
+		ctx.g2d.drawString(watermarkText, x, y);
+		ctx.g2d.dispose();
+		return bufferedImageToPngBytes(ctx.image);
+	}
+	// Helper class to hold both image and Graphics2D
+	private static class WatermarkContext {
+		BufferedImage image;
+		Graphics2D g2d;
+		WatermarkContext(BufferedImage image, Graphics2D g2d) {
+			this.image = image;
+			this.g2d = g2d;
+		}
+	}
+
+	// Extracted method to create image and graphics context with watermark settings
+	private WatermarkContext createWatermarkContext(BufferedImage originalImage, int width, float alpha, Color color, int fontSize) {
+		BufferedImage watermarked = createWatermarkedImage(originalImage);
+		Graphics2D g2d = watermarked.createGraphics();
+		setWatermarkGraphics(g2d, width, alpha, color, fontSize);
+		return new WatermarkContext(watermarked, g2d);
 	}
 	// --- Private helpers to reduce code duplication ---
 	private BufferedImage readImage(MultipartFile imageFile) throws IOException {
