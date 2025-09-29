@@ -99,5 +99,6 @@ jobs:
             -Dsonar.projectKey=hardianadi28_watermark-generator
             -Dsonar.organization=hardianadi28
             -Dsonar.java.binaries=target/classes
+            -Dsonar.coverage.exclusions=**/test/**,**/src/test/**,**/src/test/java/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
